@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer>
       <p>
-        {year} Aplikasi Manajemen Kegiatan Mahasiswa | &copy; faith
+        {year} ActiVibes | &copy; faith
       </p>
     </footer>
   );

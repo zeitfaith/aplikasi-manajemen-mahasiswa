@@ -14,7 +14,11 @@ const Login = () => {
     login(credentials);
   };
 
-  return <LoginForm onLogin={handleLogin} />;
+  return (
+    <div className="fade-in">
+      <LoginForm onLogin={handleLogin} />
+    </div>
+  );
 };
 
 export default Login;

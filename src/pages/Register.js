@@ -16,7 +16,11 @@ const Register = () => {
     navigate('/login'); 
   };
 
-  return <RegisterForm onRegister={handleRegister} />;
+  return (
+    <div className="fade-in">
+      <RegisterForm onRegister={handleRegister} />
+    </div>
+  );
 };
 
 export default Register;

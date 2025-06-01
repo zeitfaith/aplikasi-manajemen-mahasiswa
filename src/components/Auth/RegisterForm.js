@@ -12,7 +12,7 @@ const RegisterForm = ({ onRegister }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="register-form" onSubmit={handleSubmit}>
       <h2>Register</h2>
       <div>
         <label>Name:</label>

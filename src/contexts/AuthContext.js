@@ -3,25 +3,29 @@ import React, { createContext, useState, useEffect } from 'react';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Ambil user dari localStorage saat inisialisasi
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(!!user);
 
-  // Cek localStorage saat aplikasi pertama kali dijalankan
+  // Simpan user ke localStorage setiap kali user berubah
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (storedUser) {
-      setUser(storedUser);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
       setIsAuthenticated(true);
+    } else {
+      localStorage.removeItem('user');
+      setIsAuthenticated(false);
     }
-  }, []);
+  }, [user]);
 
   // Simulasi register
   const register = async (data) => {
-    // Simpan user ke localStorage (simulasi backend)
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
     setIsAuthenticated(true);
-    // Tidak langsung login, redirect ke login di Register.js
   };
 
   // Simulasi login
@@ -39,14 +43,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout
   const logout = () => {
-    localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,           // Penting untuk fitur edit profil
+        isAuthenticated,
+        login,
+        register,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

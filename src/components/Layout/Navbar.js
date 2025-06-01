@@ -12,40 +12,38 @@ const Navbar = () => {
   };
 
   return (
-    <nav>
-      <ul>
+    <nav className="navbar">
+      <ul className="navbar-menu">
         {isAuthenticated && (
           <>
-            <li>
+            <li className="navbar-item">
               <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>
                 Dashboard
               </NavLink>
             </li>
-            <li>
+            <li className="navbar-item">
               <NavLink to="/statistik" className={({ isActive }) => isActive ? 'active' : ''}>
                 Statistik
               </NavLink>
             </li>
-            <li>
+            <li className="navbar-item">
               <NavLink to="/profil" className={({ isActive }) => isActive ? 'active' : ''}>
                 Profil
               </NavLink>
             </li>
-            <li>
-              <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
-                Logout
-              </button>
+            <li className="navbar-item logout">
+              <button onClick={handleLogout} className="logout-button">Logout</button>
             </li>
           </>
         )}
         {!isAuthenticated && (
           <>
-            <li>
+            <li className="navbar-item">
               <NavLink to="/login" className={({ isActive }) => isActive ? 'active' : ''}>
                 Login
               </NavLink>
             </li>
-            <li>
+            <li className="navbar-item">
               <NavLink to="/register" className={({ isActive }) => isActive ? 'active' : ''}>
                 Register
               </NavLink>

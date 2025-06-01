@@ -5,19 +5,19 @@ const EditProfilForm = ({ onUpdate }) => {
   const { user } = useContext(AuthContext);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [prodi, setProdi] = useState('');
+  const [noHp, setNoHp] = useState('');
 
   useEffect(() => {
     if (user) {
       setName(user.name);
       setEmail(user.email);
-      setProdi(user.prodi);
+      setNoHp(user.noHp || '');
     }
   }, [user]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onUpdate({ name, email, prodi });
+    onUpdate({ name, email, noHp });
   };
 
   return (
@@ -42,11 +42,11 @@ const EditProfilForm = ({ onUpdate }) => {
         />
       </div>
       <div>
-        <label>Prodi:</label>
+        <label>No HP:</label>
         <input
           type="text"
-          value={prodi}
-          onChange={(e) => setProdi(e.target.value)}
+          value={noHp}
+          onChange={(e) => setNoHp(e.target.value)}
           required
         />
       </div>

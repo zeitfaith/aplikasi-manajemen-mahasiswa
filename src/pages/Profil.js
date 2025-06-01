@@ -3,8 +3,8 @@ import ProfilMahasiswa from '../components/Profil/ProfilMahasiswa';
 
 const Profil = () => {
   return (
-    <div>
-      <h1>Profil</h1>
+    <div className="fade-in">
+      <h1 className="profil-title">Profil</h1>
       <ProfilMahasiswa />
     </div>
   );
