@@ -1,70 +1,238 @@
-# Getting Started with Create React App
+```markdown
+# ActiVibe: Aplikasi Manajemen Kegiatan Mahasiswa
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Nama:** Muhammad Fatih Hanbali  
+**NIM:** 122140112  
+**Mata Kuliah:** Pemrograman WEB ITERA 2025
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Deskripsi
 
-### `npm start`
+**ActiVibe** adalah aplikasi web yang dirancang untuk membantu mahasiswa dalam mencatat, mengelola, dan memantau kegiatan non-akademik mereka secara digital dan terstruktur. Aplikasi ini menyediakan fitur pencatatan berbagai kegiatan seperti seminar, lomba, dan organisasi yang diikuti oleh mahasiswa, serta fitur visualisasi dan statistik untuk memudahkan pemantauan aktivitas.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Fitur Aplikasi
 
-### `npm test`
+- **Autentikasi Pengguna**
+  - Registrasi (sign up)
+  - Login (sign in)
+  - Logout
+  - Edit Profil
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **CRUD Kegiatan Mahasiswa**
+  - Menambah kegiatan
+  - Mengedit kegiatan
+  - Menghapus kegiatan
+  - Melihat daftar kegiatan yang sudah diikuti
 
-### `npm run build`
+- **Statistik & Visualisasi**
+  - Statistik jumlah kegiatan per kategori/status
+  - Visualisasi sederhana (chart atau summary box)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Manajemen Data Mahasiswa**
+  - Lihat & edit profil mahasiswa
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Tampilan Responsif**
+  - Menggunakan library CSS (Bootstrap, Tailwind, atau MUI)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Routing & State Management**
+  - Navigasi antar halaman (login, dashboard, detail kegiatan, statistik, dsb.)
+  - Context API untuk state management di frontend
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Teknologi yang Digunakan
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Backend:** Pyramid Framework
+- **Database:** PostgreSQL/MySQL
+- **Frontend:** React.js (Context API & React Router)
+- **Authentication:** JSON Web Token (JWT)
+- **Password Hashing:** bcrypt via Passlib
+- **CORS:** Untuk mengizinkan permintaan dari domain/port berbeda
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Instalasi
 
-## Learn More
+### Backend (Pyramid Framework)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **Clone repositori:**
+   ```
+   git clone https://github.com/yourusername/actvibe.git
+   ```
+2. **Masuk ke direktori backend:**
+   ```
+   cd actvibe/backend
+   ```
+3. **Install dependensi:**
+   ```
+   pip install -r requirements.txt
+   ```
+4. **Jalankan aplikasi backend:**
+   ```
+   pserve development.ini
+   ```
+   Backend akan berjalan di [http://localhost:6543](http://localhost:6543).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+### Frontend (React.js)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **Masuk ke direktori frontend:**
+   ```
+   cd actvibe/frontend
+   ```
+2. **Install dependensi:**
+   ```
+   npm install
+   ```
+3. **Jalankan aplikasi frontend:**
+   ```
+   npm start
+   ```
+   Frontend akan berjalan di [http://localhost:3000](http://localhost:3000).
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Endpoints API
 
-### Making a Progressive Web App
+### 1. **POST /register** – Registrasi Pengguna
+**Request Body:**
+```
+{
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "password": "password123"
+}
+```
+**Response:**
+```
+{
+  "status": "success",
+  "message": "Registrasi berhasil"
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 2. **POST /login** – Login Pengguna
+**Request Body:**
+```
+{
+  "email": "johndoe@example.com",
+  "password": "password123"
+}
+```
+**Response:**
+```
+{
+  "status": "success",
+  "message": "Login berhasil",
+  "data": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "johndoe@example.com"
+  }
+}
+```
 
-### Advanced Configuration
+### 3. **GET /kegiatan** – Ambil Semua Kegiatan
+**Response:**
+```
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "nama_kegiatan": "Seminar Teknologi",
+      "jenis_kegiatan": "Seminar",
+      "tanggal": "2025-06-10",
+      "jam_mulai": "10:00",
+      "jam_selesai": "12:00",
+      "status": "Akan Datang"
+    }
+  ]
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 4. **POST /kegiatan** – Menambah Kegiatan
+**Request Body:**
+```
+{
+  "nama_kegiatan": "Seminar Teknologi",
+  "jenis_kegiatan": "Seminar",
+  "tanggal": "2025-06-10",
+  "jam_mulai": "10:00",
+  "jam_selesai": "12:00"
+}
+```
+**Response:**
+```
+{
+  "status": "success",
+  "message": "Kegiatan berhasil ditambahkan"
+}
+```
 
-### Deployment
+### 5. **PUT /kegiatan/{id}** – Update Kegiatan
+**Request Body:**
+```
+{
+  "nama_kegiatan": "Seminar Teknologi 2",
+  "jenis_kegiatan": "Seminar",
+  "tanggal": "2025-06-15",
+  "jam_mulai": "09:00",
+  "jam_selesai": "11:00"
+}
+```
+**Response:**
+```
+{
+  "status": "success",
+  "message": "Kegiatan berhasil diupdate"
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### 6. **DELETE /kegiatan/{id}** – Hapus Kegiatan
+**Response:**
+```
+{
+  "status": "success",
+  "message": "Kegiatan berhasil dihapus"
+}
+```
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Contoh Penggunaan
+
+- **Registrasi:**  
+  Akses endpoint `POST /register` untuk mendaftarkan pengguna baru.
+
+- **Login:**  
+  Setelah registrasi, gunakan `POST /login` untuk login.
+
+- **Menambah/Mengelola Kegiatan:**  
+  - Tambah kegiatan: `POST /kegiatan`
+  - Edit kegiatan: `PUT /kegiatan/{id}`
+  - Hapus kegiatan: `DELETE /kegiatan/{id}`
+
+---
+
+## Referensi
+
+- [Pyramid Documentation](https://docs.pylonsproject.org/projects/pyramid/en/latest/)
+- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/en/20/)
+- [Passlib Documentation](https://passlib.readthedocs.io/en/stable/)
+- [bcrypt GitHub](https://github.com/pyca/bcrypt/)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [React Documentation](https://react.dev/)
+
+---
+```
+
+Citations:
+[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/65304378/dd681c0a-45ac-4aff-9157-d2fd3107ec42/Muhammad-Fatih-Hanbali.txt
+
+---
+Answer from Perplexity: pplx.ai/share
