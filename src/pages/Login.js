@@ -1,21 +1,20 @@
-import React, { useContext } from 'react';
-import LoginForm from '../components/Auth/LoginForm';
-import { AuthContext } from '../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+// src/pages/Login.js
+import React, { useContext } from "react";
+import LoginForm from "../components/Auth/LoginForm";
+import { AuthContext } from "../contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 
 const Login = () => {
   const { isAuthenticated, login } = useContext(AuthContext);
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
-  }
+  if (isAuthenticated) return <Navigate to="/dashboard" />;
 
-  const handleLogin = (credentials) => {
-    login(credentials);
+  const handleLogin = async (credentials) => {
+    await login(credentials);
   };
 
   return (
-    <div className="fade-in">
+    <div>
       <LoginForm onLogin={handleLogin} />
     </div>
   );

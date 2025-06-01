@@ -1,172 +1,223 @@
-import React, { useContext, useState } from 'react';
-import { KegiatanContext } from '../../contexts/KegiatanContext';
-
-const statusLabel = {
-  'Sedang Berlangsung': 'primary',
-  'Akan Datang': 'info',
-  'Selesai': 'success',
-};
-
-function getStatusKegiatan(item) {
-  if (item.statusManual === 'Selesai') return 'Selesai';
-  const now = new Date();
-  const mulai = new Date(`${item.tanggal}T${item.jamMulai || '00:00'}`);
-  const selesai = new Date(`${item.tanggal}T${item.jamSelesai || '23:59'}`);
-  if (now < mulai) return 'Akan Datang';
-  if (now >= mulai && now <= selesai) return 'Sedang Berlangsung';
-  return 'Selesai';
-}
+import React, { useState, useEffect } from "react";
 
 const KegiatanList = () => {
-  const { kegiatan, setKegiatan, editKegiatan, deleteKegiatan } = useContext(KegiatanContext);
-  const [editIdx, setEditIdx] = useState(null);
-  const [editData, setEditData] = useState({});
+  const [kegiatan, setKegiatan] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleEdit = (idx, item) => {
-    setEditIdx(idx);
-    setEditData({
-      nama_kegiatan: item.nama_kegiatan,
-      jenis_kegiatan: item.jenis_kegiatan,
-      tanggal: item.tanggal,
-      jamMulai: item.jamMulai,
-      jamSelesai: item.jamSelesai,
-    });
+  // Fungsi fetch data kegiatan dari backend
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("http://localhost:6543/kegiatan");
+      if (!res.ok) throw new Error(`Gagal fetch data: ${res.status}`);
+      const data = await res.json();
+      if (data.status !== "success")
+        throw new Error(data.message || "Fetch gagal");
+
+      // Normalisasi key agar camelCase sesuai frontend
+      const normalized = data.data.map((item) => ({
+        ...item,
+        jamMulai: item.jam_mulai,
+        jamSelesai: item.jam_selesai,
+      }));
+      setKegiatan(normalized);
+    } catch (err) {
+      setError(err.message);
+      setKegiatan([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditChange = (e) => {
-    setEditData({ ...editData, [e.target.name]: e.target.value });
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Fungsi update kegiatan (edit)
+  const handleEdit = async (updatedKegiatan) => {
+    try {
+      const res = await fetch(
+        `http://localhost:6543/kegiatan/${updatedKegiatan.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nama_kegiatan: updatedKegiatan.nama_kegiatan,
+            jenis_kegiatan: updatedKegiatan.jenis_kegiatan,
+            tanggal: updatedKegiatan.tanggal,
+            jam_mulai: updatedKegiatan.jamMulai,
+            jam_selesai: updatedKegiatan.jamSelesai,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error(`Gagal update kegiatan: ${res.status}`);
+
+      // Update lokal state
+      setKegiatan((prev) =>
+        prev.map((k) =>
+          k.id === updatedKegiatan.id ? { ...k, ...updatedKegiatan } : k
+        )
+      );
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
-  const handleEditSubmit = (idx) => {
-    editKegiatan(idx, editData);
-    setEditIdx(null);
-    setEditData({});
+  // Fungsi hapus kegiatan
+  const handleDelete = async (id) => {
+    if (!window.confirm("Yakin ingin menghapus kegiatan ini?")) return;
+    try {
+      const res = await fetch(`http://localhost:6543/kegiatan/${id}/delete`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`Gagal hapus kegiatan: ${res.status}`);
+
+      setKegiatan((prev) => prev.filter((k) => k.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
   };
+
+  const statusLabel = {
+    "Sedang Berlangsung": "kegiatan-status-sedang-berlangsung", // Teal color
+    "Akan Datang": "kegiatan-status-akandatang", // Orange color
+    Selesai: "kegiatan-status-selesai", // Dark Blue color
+  };
+
+  function getStatusKegiatan(item) {
+    if (item.statusManual === "Selesai") return "Selesai";
+    const now = new Date();
+    const mulai = new Date(`${item.tanggal}T${item.jamMulai || "00:00"}`);
+    const selesai = new Date(`${item.tanggal}T${item.jamSelesai || "23:59"}`);
+    if (now < mulai) return "Akan Datang";
+    if (now >= mulai && now <= selesai) return "Sedang Berlangsung";
+    return "Selesai";
+  }
 
   return (
     <div>
-      <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Daftar Kegiatan</h2>
-      <ul className="kegiatan-list">
-        {kegiatan.length === 0 && <li>Tidak ada kegiatan.</li>}
-        {kegiatan.map((item, idx) => {
+      <h2 style={{ marginBottom: "1.5rem", color: "var(--primary)" }}>
+        Daftar Kegiatan
+      </h2>
+
+      {loading && <p>Memuat data kegiatan...</p>}
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {!loading && !error && kegiatan.length === 0 && (
+        <p>Tidak ada kegiatan.</p>
+      )}
+
+      <ul className="kegiatan-list" style={{ listStyle: "none", padding: 0 }}>
+        {kegiatan.map((item) => {
           const status = getStatusKegiatan(item);
-          const isEditing = editIdx === idx;
           return (
             <li
-              key={idx}
-              className={`kegiatan-card kegiatan-status-${status.replace(/\s+/g, '-').toLowerCase()}`}
+              key={item.id}
+              className={`kegiatan-card ${statusLabel[status] || "default"}`}
+              style={{
+                border: "1px solid #ddd",
+                padding: "1rem",
+                marginBottom: "1rem",
+                borderRadius: "8px",
+              }}
             >
-              {isEditing ? (
-                <div>
-                  <input
-                    type="text"
-                    name="nama_kegiatan"
-                    value={editData.nama_kegiatan}
-                    onChange={handleEditChange}
-                    style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8, width: '100%' }}
-                  />
-                  <input
-                    type="date"
-                    name="tanggal"
-                    value={editData.tanggal}
-                    onChange={handleEditChange}
-                    style={{ marginRight: 8, marginBottom: 8 }}
-                  />
-                  <input
-                    type="time"
-                    name="jamMulai"
-                    value={editData.jamMulai}
-                    onChange={handleEditChange}
-                    style={{ marginRight: 8 }}
-                  />
-                  <input
-                    type="time"
-                    name="jamSelesai"
-                    value={editData.jamSelesai}
-                    onChange={handleEditChange}
-                  />
-                  <input
-                    type="text"
-                    name="jenis_kegiatan"
-                    value={editData.jenis_kegiatan}
-                    onChange={handleEditChange}
-                    placeholder="Jenis Kegiatan"
-                    style={{ marginLeft: 8 }}
-                  />
-                  <div style={{ marginTop: 10 }}>
-                    <button
-                      onClick={() => handleEditSubmit(idx)}
-                      style={{
-                        background: '#4caf50', color: '#fff', border: 'none',
-                        borderRadius: '1em', padding: '0.2em 1em', marginRight: 8, cursor: 'pointer'
-                      }}
-                    >
-                      Simpan
-                    </button>
-                    <button
-                      onClick={() => setEditIdx(null)}
-                      style={{
-                        background: '#e63946', color: '#fff', border: 'none',
-                        borderRadius: '1em', padding: '0.2em 1em', cursor: 'pointer'
-                      }}
-                    >
-                      Batal
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="kegiatan-title">{item.nama_kegiatan}</div>
-                  <div className="kegiatan-meta">
-                    <span className={`kegiatan-badge badge-${statusLabel[status] || 'default'}`}>
-                      {status}
-                    </span>
-                    <span className="kegiatan-date">
-                      <i className="fa fa-calendar" style={{ marginRight: 6 }}></i>
-                      {item.tanggal}
-                    </span>
-                    <span className="kegiatan-jam">
-                      <i className="fa fa-clock" style={{ marginRight: 6 }}></i>
-                      {item.jamMulai && item.jamSelesai
-                        ? `${item.jamMulai} - ${item.jamSelesai}`
-                        : (item.jamMulai || item.jamSelesai || '-')}
-                    </span>
-                    <span className="kegiatan-jenis">{item.jenis_kegiatan}</span>
-                    <button
-                      className="btn-edit"
-                      onClick={() => handleEdit(idx, item)}
-                      style={{
-                        marginLeft: '1em',
-                        background: '#f7b32b',
-                        color: '#2a3d66',
-                        border: 'none',
-                        borderRadius: '1em',
-                        padding: '0.2em 1em',
-                        cursor: 'pointer',
-                        fontSize: '0.93em'
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn-delete"
-                      onClick={() => deleteKegiatan(idx)}
-                      style={{
-                        marginLeft: '0.5em',
-                        background: '#e63946',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '1em',
-                        padding: '0.2em 1em',
-                        cursor: 'pointer',
-                        fontSize: '0.93em'
-                      }}
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </>
-              )}
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "1.1rem",
+                  marginBottom: 6,
+                }}
+              >
+                {item.nama_kegiatan}
+              </div>
+              <div>
+                <span
+                  className={`kegiatan-badge`}
+                  style={{
+                    marginRight: 12,
+                    padding: "0.2em 0.5em",
+                    borderRadius: "4px",
+                    backgroundColor: "#eee",
+                  }}
+                >
+                  {status}
+                </span>
+                <span style={{ marginRight: 12 }}>
+                  <i className="fa fa-calendar" style={{ marginRight: 6 }}></i>
+                  {item.tanggal}
+                </span>
+                <span style={{ marginRight: 12 }}>
+                  <i className="fa fa-clock" style={{ marginRight: 6 }}></i>
+                  {item.jamMulai && item.jamSelesai
+                    ? `${item.jamMulai} - ${item.jamSelesai}`
+                    : item.jamMulai || item.jamSelesai || "-"}
+                </span>
+                <span>Jenis: {item.jenis_kegiatan}</span>
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <button
+                  onClick={() => {
+                    const nama_kegiatan = prompt(
+                      "Edit Nama Kegiatan:",
+                      item.nama_kegiatan
+                    );
+                    if (!nama_kegiatan) return;
+                    const jenis_kegiatan = prompt(
+                      "Edit Jenis Kegiatan:",
+                      item.jenis_kegiatan
+                    );
+                    if (!jenis_kegiatan) return;
+                    const tanggal = prompt(
+                      "Edit Tanggal (YYYY-MM-DD):",
+                      item.tanggal
+                    );
+                    if (!tanggal) return;
+                    const jamMulai = prompt(
+                      "Edit Jam Mulai (HH:mm):",
+                      item.jamMulai
+                    );
+                    if (!jamMulai) return;
+                    const jamSelesai = prompt(
+                      "Edit Jam Selesai (HH:mm):",
+                      item.jamSelesai
+                    );
+                    if (!jamSelesai) return;
+
+                    handleEdit({
+                      ...item,
+                      nama_kegiatan,
+                      jenis_kegiatan,
+                      tanggal,
+                      jamMulai,
+                      jamSelesai,
+                    });
+                  }}
+                  style={{
+                    marginRight: "0.5rem",
+                    backgroundColor: "#f7b32b",
+                    border: "none",
+                    padding: "0.3rem 0.8rem",
+                    borderRadius: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  style={{
+                    backgroundColor: "#e63946",
+                    color: "white",
+                    border: "none",
+                    padding: "0.3rem 0.8rem",
+                    borderRadius: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Hapus
+                </button>
+              </div>
             </li>
           );
         })}

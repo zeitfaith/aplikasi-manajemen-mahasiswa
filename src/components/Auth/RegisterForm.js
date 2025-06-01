@@ -1,19 +1,48 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const RegisterForm = ({ onRegister }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const RegisterForm = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onRegister({ name, email, password });
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:6543/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Registrasi gagal");
+      }
+
+      alert("Registrasi berhasil! Silakan login.");
+      navigate("/login");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form className="register-form" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="register-form">
       <h2>Register</h2>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <div>
         <label>Name:</label>
         <input
@@ -21,8 +50,10 @@ const RegisterForm = ({ onRegister }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          disabled={loading}
         />
       </div>
+
       <div>
         <label>Email:</label>
         <input
@@ -30,8 +61,10 @@ const RegisterForm = ({ onRegister }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={loading}
         />
       </div>
+
       <div>
         <label>Password:</label>
         <input
@@ -39,12 +72,13 @@ const RegisterForm = ({ onRegister }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          disabled={loading}
         />
       </div>
-      <button type="submit">Register</button>
-      <p style={{ marginTop: '1rem' }}>
-        Sudah punya akun? <Link to="/login">Login di sini</Link>
-      </p>
+
+      <button type="submit" disabled={loading}>
+        {loading ? "Mendaftar..." : "Register"}
+      </button>
     </form>
   );
 };

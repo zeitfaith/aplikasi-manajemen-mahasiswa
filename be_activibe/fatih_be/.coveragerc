@@ -1,0 +1,3 @@
+[run]
+source = fatih_be
+omit = fatih_be/test*
